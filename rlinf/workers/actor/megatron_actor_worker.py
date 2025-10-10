@@ -18,6 +18,12 @@ from typing import Dict, List, Optional, Tuple
 
 import torch
 import torch.distributed
+
+try:
+    from mindspeed.megatron_adaptor import repatch
+except ImportError:
+    repatch = None
+
 from megatron.core import parallel_state
 from megatron.core.distributed import DistributedDataParallel as DDP
 from megatron.core.num_microbatches_calculator import get_num_microbatches
@@ -94,6 +100,9 @@ class MegatronActor(MegatronModelManager, Worker):
             cfg (DictConfig): The configuration for the actor.
         """
         Worker.__init__(self)
+        if repatch is not None:
+            # NPU MindSpeed patch, will be refactored with MindSpeedEngine.
+            repatch(self.config.actor.megatron.get("override_transformer_config", {}))
         role_cfg = getattr(cfg, role, None)
         self.role_cfg = role_cfg
         if role_cfg is None:

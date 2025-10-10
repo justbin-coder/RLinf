@@ -20,6 +20,12 @@ from omegaconf.dictconfig import DictConfig
 
 from toolkits.ckpt_convertor.config import ConvertorConfig, load_convertor_config
 
+try:
+    # NPU patch
+    import mindspeed.megatron_adaptor  # noqa: F401
+except ImportError:
+    pass
+    
 from .convert_hf_to_middle_file import (
     convert_layer_loadsave,
 )
