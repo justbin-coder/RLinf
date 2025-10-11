@@ -19,15 +19,13 @@ from omegaconf import DictConfig
 
 from rlinf.algorithms.rewards import get_reward_class
 from rlinf.data.io_struct import RolloutResult
-from rlinf.hybrid_engines.fsdp.fsdp_model_manager import FSDPModelManager
 from rlinf.scheduler import Channel, Worker
 from rlinf.utils.placement import ModelParallelComponentPlacement
 
 
-class RewardWorker(FSDPModelManager, Worker):
+class RewardWorker(Worker):
     def __init__(self, cfg: DictConfig, placement: ModelParallelComponentPlacement):
         Worker.__init__(self)
-        super().__init__(cfg.reward)
         self.cfg = cfg
         self.component_placement = placement
 
@@ -39,9 +37,7 @@ class RewardWorker(FSDPModelManager, Worker):
 
     def init_worker(self):
         if self.cfg.reward.use_reward_model:
-            self.setup_model_and_optimizer()
-            self.offload_fsdp_param_and_grad()
-            self.offload_fsdp_optimizer()
+            raise NotImplementedError("Reward model is not implemented yet.")
         else:
             self.reward = get_reward_class(self.cfg.reward.reward_type)(self.cfg.reward)
 
@@ -106,10 +102,4 @@ class RewardWorker(FSDPModelManager, Worker):
         )
 
     def compute_batch_rewards_with_model(self, batch: Dict[str, torch.Tensor]):
-        self.model.eval()
-        with torch.no_grad():
-            # TODO: fix this
-            rewards = (
-                self.model(batch["input_ids"], batch["attention_mask"]).detach().cpu()
-            )
-        return rewards
+        raise NotImplementedError("Reward model is not implemented yet.")
