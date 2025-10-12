@@ -54,7 +54,6 @@ from rlinf.utils.placement import (
     ModelParallelComponentPlacement,
 )
 from rlinf.utils.utils import (
-    compute_entropy_from_logits,
     compute_logprobs_from_logits,
     cpu_weight_swap,
     masked_mean,
@@ -132,9 +131,6 @@ class FSDPActor(FSDPModelManager, Worker):
         if self.cfg.actor.get("enable_offload", False):
             self.offload_fsdp_param_and_grad()
             self.offload_fsdp_optimizer()
-            torch.cuda.synchronize()
-            gc.collect()
-            torch.cuda.empty_cache()
         self._setup_rollout_weight_dst_ranks()
 
     def _setup_rollout_weight_dst_ranks(self) -> None:
@@ -391,10 +387,6 @@ class FSDPActor(FSDPModelManager, Worker):
                     logprobs = compute_logprobs_from_logits(
                         logits, responses, task_type=self.cfg.runner.task_type
                     )
-                    if self.calculate_entropy:
-                        entropy = compute_entropy_from_logits(
-                            logits, task_type=self.cfg.runner.task_type
-                        )  # (bsz, response_length)
 
                     clip_ratio = self.cfg.algorithm.ratio_clip_eps
                     clip_ratio_low = (

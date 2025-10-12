@@ -49,22 +49,35 @@ class FSDPModelManager:
         self.tokenizer = hf_tokenizer(cfg.tokenizer.tokenizer_model)
 
     def model_provider_func(self) -> torch.nn.Module:
+        cfg = self._cfg
+        use_gptq = cfg.model.get("gptq_model", False)
+        load_in_8bit = cfg.model.get("load_in_8bit", False)
+
+        use_triton = cfg.get("use_triton", True)
+
+        assert torch.cuda.is_available(), "CUDA is not available."
+        local_rank = int(os.environ.get("LOCAL_RANK", 0))
+        device = torch.device(f"cuda:{local_rank}")
+
         model_config = AutoConfig.from_pretrained(
-            self._cfg.model.model_path,
+            cfg.model.model_path,
             trust_remote_code=True,
             attn_implementation="flash_attention_2",
         )
 
-        if self._cfg.model.get("gptq_model", False):
+        if use_gptq:
             from auto_gptq import AutoGPTQForCausalLM
 
             model_wrapper = AutoGPTQForCausalLM.from_quantized(
-                self._cfg.model.model_path, device="cuda:0", use_triton=True
+                cfg.model.model_path,
+                device=device,
+                use_triton=use_triton,
             )
             model = model_wrapper.model
-        elif self._cfg.model.get("load_in_8bit", False):
+        elif load_in_8bit:
             model = AutoModelForCausalLM.from_pretrained(
-                self._cfg.model.model_path,
+                cfg.model.model_path,
+                config=model_config,
                 load_in_8bit=True,
             )
         else:
@@ -73,22 +86,15 @@ class FSDPModelManager:
             else:
                 auto_model_class = AutoModelForCausalLM
 
-            # default load in float16
             model = auto_model_class.from_pretrained(
-                self._cfg.model.model_path,
+                cfg.model.model_path,
                 torch_dtype=self.torch_dtype,
                 config=model_config,
                 trust_remote_code=True,
             )
 
-        model.to(self.torch_dtype)
-
-        if torch.cuda.is_available():
-            model = model.cuda()
-        if self.torch_dtype == torch.float16:
-            model = model.half()
-
-        torch.distributed.barrier()
+        if torch.distributed.is_initialized():
+            torch.distributed.barrier()
         return model
 
     def setup_model_and_optimizer(self):
@@ -132,7 +138,7 @@ class FSDPModelManager:
             backward_prefetch=(
                 BackwardPrefetch.BACKWARD_PRE
                 if self._cfg.fsdp.backward_prefetch
-                else BackwardPrefetch.NONE
+                else None
             ),
             limit_all_gathers=self._cfg.fsdp.limit_all_gathers,
             use_orig_params=self._cfg.fsdp.use_orig_params,

@@ -841,7 +841,7 @@ class MegatronActor(MegatronModelManager, Worker):
         self,
         input_channel: Channel,
         output_channel: Channel,
-        rollout_channel: Channel,
+        rollout_channel: Optional[Channel],
         compute_ref_logprobs: bool,
     ):
         """
@@ -860,7 +860,9 @@ class MegatronActor(MegatronModelManager, Worker):
             # Must be called after batch is retrieved, suggesting that rollout has stopped
             # Otherwise, loading model might cause OOM in the collocated mode
             self._load_weight_and_optimizer(
-                input_channel if self.is_pipeline else rollout_channel
+                input_channel
+                if self.is_pipeline or rollout_channel is None
+                else rollout_channel
             )
 
             # Prev logprobs

@@ -141,7 +141,7 @@ jobs:
           source switch_env reason
           bash tests/e2e_tests/reasoning/run_pipeline.sh qwen2.5-1.5b-grpo-pipeline-mg-vllm
 
-      - name: FSDO SGLang Collocated mode
+      - name: FSDP SGLang Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
@@ -197,7 +197,7 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-sglang-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-sgl-rollout-logprobs
 
       - name: FSDP vLLM Collocated mode
         timeout-minutes: 20
@@ -224,6 +224,28 @@ jobs:
           export REPO_PATH=$(pwd)
           source switch_env reason
           bash tests/e2e_tests/coding_online_rl/run_coding_online_rl.sh
+
+  qwen-vl-grpo-test:
+    needs: [check-changes]
+    if: needs.check-changes.outputs.file_filter == 'true'
+    runs-on: reason
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: FSDP SGLang Collocated mode
+        timeout-minutes: 20
+        run: |
+          export REPO_PATH=$(pwd)
+          source switch_env reason
+          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-vl-3b-grpo-collocated-fsdp-sgl
+
+      - name: FSDP vLLM Collocated mode
+        timeout-minutes: 20
+        run: |
+          export REPO_PATH=$(pwd)
+          source switch_env reason
+          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-vl-3b-grpo-collocated-fsdp-vllm
 
   # =============================================== embodied e2e tests ====================================================
 
@@ -312,7 +334,7 @@ jobs:
 
       # Reason e2e tests
       reason-qwen-grpo-test, reason-qwen-grpo-test-rollout-logprobs,
-      coding-online-rl-qwen-ppo-test,
+      coding-online-rl-qwen-ppo-test, qwen-vl-grpo-test,
 
       # Embodied e2e tests
       embodied-maniskill-ppo-openvla-test, embodied-maniskill-grpo-openvlaoft-test, embodied-libero-goal-grpo-openvlaoft-test,embodied-libero-130-grpo-openvlaoft-test,

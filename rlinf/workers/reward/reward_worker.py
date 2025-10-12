@@ -19,6 +19,7 @@ from omegaconf import DictConfig
 
 from rlinf.algorithms.rewards import get_reward_class
 from rlinf.data.io_struct import RolloutResult
+from rlinf.data.tokenizers import hf_tokenizer
 from rlinf.scheduler import Channel, Worker
 from rlinf.utils.placement import ModelParallelComponentPlacement
 
@@ -28,7 +29,7 @@ class RewardWorker(Worker):
         Worker.__init__(self)
         self.cfg = cfg
         self.component_placement = placement
-
+        self.tokenizer = hf_tokenizer(cfg.reward.tokenizer.tokenizer_model)
         self.total_batch_size_per_dp = (
             self.cfg.data.rollout_batch_size
             * self.cfg.algorithm.get("group_size", 1)

@@ -644,14 +644,12 @@ def validate_cfg(cfg: DictConfig) -> DictConfig:
         cfg.actor = validate_model_cfg_by_hf_config(cfg.actor, cfg.rollout.model_dir)
     elif cfg.actor.training_backend == "fsdp":
         cfg.actor = validate_fsdp_cfg(cfg.actor)
-        cfg.actor = validate_model_cfg_by_hf_config(cfg.actor, cfg.rollout.model_dir)
 
     if cfg.critic.use_critic_model and cfg.critic.training_backend == "megatron":
         cfg.critic = validate_megatron_cfg(cfg.critic)
-        cfg = validate_model_cfg_by_hf_config(cfg.critic, cfg.rollout.model_dir)
+        cfg.critic = validate_model_cfg_by_hf_config(cfg.critic, cfg.rollout.model_dir)
     elif cfg.critic.use_critic_model and cfg.critic.training_backend == "fsdp":
         cfg.critic = validate_fsdp_cfg(cfg.critic)
-        cfg.critic = validate_model_cfg_by_hf_config(cfg.critic, cfg.rollout.model_dir)
 
     return cfg
 
