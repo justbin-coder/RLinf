@@ -110,8 +110,8 @@ class FSDPModelManager:
 
         mixed_precision = MixedPrecision(
             param_dtype=self.torch_dtype,
-            reduce_dtype=torch.float32,
-            buffer_dtype=torch.float32,
+            reduce_dtype=self.torch_dtype,
+            buffer_dtype=self.torch_dtype,
         )
 
         if self._cfg.model.sharding_strategy == "full_shard":

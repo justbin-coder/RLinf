@@ -118,42 +118,42 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-mg-sgl
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-mg-sgl
 
       - name: Megatron vLLM Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-mg-vllm
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-mg-vllm
 
       - name: Megatron SGLang Pipeline mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_pipeline.sh qwen2.5-1.5b-grpo-pipeline-mg-sgl
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-pipeline-mg-sgl
 
       - name: Megatron vLLM Pipeline mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_pipeline.sh qwen2.5-1.5b-grpo-pipeline-mg-vllm
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-pipeline-mg-vllm
 
       - name: FSDP SGLang Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-sgl
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-fsdp-sgl
 
       - name: FSDP vLLM Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-vllm
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-fsdp-vllm
 
 
   reason-qwen-grpo-test-rollout-logprobs:
@@ -169,42 +169,42 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-mg-sgl-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-mg-sgl-rollout-logprobs
 
       - name: Megatron vLLM Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-mg-vllm-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-mg-vllm-rollout-logprobs
 
       - name: Megatron SGLang Pipeline mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_pipeline.sh qwen2.5-1.5b-grpo-pipeline-mg-sgl-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-pipeline-mg-sgl-rollout-logprobs
 
       - name: Megatron vLLM Pipeline mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_pipeline.sh qwen2.5-1.5b-grpo-pipeline-mg-vllm-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-pipeline-mg-vllm-rollout-logprobs
 
       - name: FSDP SGLang Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-sgl-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-fsdp-sgl-rollout-logprobs
 
       - name: FSDP vLLM Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-1.5b-grpo-collocated-fsdp-vllm-rollout-logprobs
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-1.5b-grpo-collocated-fsdp-vllm-rollout-logprobs
 
   coding-online-rl-qwen-ppo-test:
     needs: [check-changes]
@@ -223,7 +223,7 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/coding_online_rl/run_coding_online_rl.sh
+          bash tests/e2e_tests/coding_online_rl/run.sh
 
   qwen-vl-grpo-test:
     needs: [check-changes]
@@ -238,14 +238,14 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-vl-3b-grpo-collocated-fsdp-sgl
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-vl-3b-grpo-collocated-fsdp-sgl
 
       - name: FSDP vLLM Collocated mode
         timeout-minutes: 20
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/reasoning/run_collocated.sh qwen2.5-vl-3b-grpo-collocated-fsdp-vllm
+          bash tests/e2e_tests/reasoning/run.sh qwen2.5-vl-3b-grpo-collocated-fsdp-vllm
 
   # =============================================== embodied e2e tests ====================================================
 
@@ -321,7 +321,7 @@ jobs:
         run: |
           export REPO_PATH=$(pwd)
           source switch_env reason
-          bash tests/e2e_tests/auto_placement/run_auto_placement.sh
+          bash tests/e2e_tests/auto_placement/run.sh
 
 # =============================================== finale ====================================================
 

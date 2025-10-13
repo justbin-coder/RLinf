@@ -222,16 +222,12 @@ class CodingOnlineRLRunner:
 
                 # Advantages and returns
                 adv_handle: Handle = self.actor.compute_advantages_and_returns(
-                    input_channel=self.inference_channel,
+                    input_channel=inference_channel,
                     output_channel=self.actor_channel,
                 )
 
                 # Actor training
                 actor_input_channel = self.actor_channel
-                if self.is_pipeline:
-                    # In pipeline mode, the rollout already contains the advantages and returns
-                    # So the above two steps are in fact no-ops, and we should directly use the inference channel as the input
-                    actor_input_channel = inference_channel
                 actor_handle: Handle = self.actor.run_training(
                     input_channel=actor_input_channel,
                 )

@@ -20,10 +20,10 @@ runner:
     logger_backends: ["tensorboard"] # wandb, swanlab
 
   max_epochs: 1
-  max_steps: 3
+  max_steps: 2
 
   val_check_interval: 1
-  save_interval: 50
+  save_interval: -1
 
   seq_length: 2048
 

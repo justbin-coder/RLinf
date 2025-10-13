@@ -78,14 +78,9 @@ class VLLMWorker(_VllmInnerWorker):
         torch.cuda.synchronize()
 
         model = self.model_runner.model
-        with torch.no_grad():
-            for mod in model.modules():
-                for name, buf in list(getattr(mod, "_buffers", {}).items()):
-                    if isinstance(buf, torch.Tensor) and buf.is_cuda:
-                        cpu_buf = (
-                            buf.detach().to("cpu", non_blocking=False).contiguous()
-                        )
-                        mod._buffers[name] = cpu_buf
+        self._sleep_saved_buffers = {
+            name: buffer.cpu().clone() for name, buffer in model.named_buffers()
+        }
         torch.cuda.empty_cache()
 
         super().sleep(level=2)
