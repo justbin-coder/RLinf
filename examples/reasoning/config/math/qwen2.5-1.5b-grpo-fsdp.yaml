@@ -48,7 +48,7 @@ algorithm:
   # val rollout mbs
   val_rollout_batch_size_per_gpu: 4 # ${.rollout_batch_size_per_gpu}
 
-  recompute_logprobs: False
+  recompute_logprobs: True
   shuffle_rollout: False
 
   # GRPO loss params
