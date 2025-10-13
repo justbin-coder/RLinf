@@ -283,7 +283,7 @@ actor:
 
 reward:
   use_reward_model: False
-  reward_type: fim_verify_call
+  reward_type: code
   reward_scale: 5.0
 
 critic:

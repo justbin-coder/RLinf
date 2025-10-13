@@ -31,7 +31,6 @@ import rlinf.algorithms  # noqa: F401
 from rlinf.algorithms.registry import (
     actor_loss,
     calculate_adv_and_returns,
-    get_reward_fn,
 )
 from rlinf.algorithms.utils import kl_penalty
 from rlinf.data.io_struct import (
@@ -79,7 +78,6 @@ from rlinf.utils.utils import (
     seq_mean_token_sum,
 )
 from rlinf.workers.rollout.utils import RankMapper
-from toolkits import register_rewards
 
 
 class MegatronActor(MegatronModelManager, Worker):
@@ -102,6 +100,10 @@ class MegatronActor(MegatronModelManager, Worker):
         self.cfg = cfg
         self.component_placement = placement
 
+        # check placement validity when actor backend is megatron
+        assert placement.rollout_tp_size <= placement.actor_tp_size, (
+            f" rollout tensor parallel size {placement.rollout_tp_size} must be less than or equal to actor tensor parallel size {placement.actor_tp_size}."
+        )
         # Data configurations
         self.response_len = (
             role_cfg.model.encoder_seq_length - cfg.data.max_prompt_length
@@ -153,11 +155,6 @@ class MegatronActor(MegatronModelManager, Worker):
         self.is_optimizer_offloaded = False
         self.ref_policy_state_dict = None
         self.is_pipeline = self.component_placement.is_disaggregated
-
-        # Reward configurations
-        if not self.cfg.reward.use_reward_model:
-            register_rewards()
-            self.reward_fn = get_reward_fn(self.cfg.reward.reward_type)
 
         # Rollout configurations
         self.rollout_group_name = self.cfg.rollout.group_name

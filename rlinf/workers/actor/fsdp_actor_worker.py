@@ -111,16 +111,6 @@ class FSDPActor(FSDPModelManager, Worker):
                 f"algorithm.loss_agg_func={self.cfg.algorithm.loss_agg_func} is not supported!"
             )
 
-        # Reward configurations
-        if not self.cfg.reward.use_reward_model:
-            assert self.cfg.reward.reward_type in ["math", "vqa"], (
-                "only support math and vqa reward!"
-            )
-            from rlinf.algorithms.rewards import get_reward_class
-
-            reward_cls = get_reward_class(self.cfg.reward.reward_type)
-            self.reward = reward_cls(self.cfg.reward)
-
     def init_worker(self) -> None:
         self.setup_model_and_optimizer()
         if self.cfg.algorithm.kl_beta > 0 and self.cfg.actor.get(

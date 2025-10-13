@@ -18,7 +18,6 @@ import dataclasses
 from typing import Dict, List, Optional, Tuple
 
 import numpy as np
-import torch
 from omegaconf import DictConfig
 from sglang.srt.server_args import ServerArgs
 from transformers import AutoTokenizer
@@ -35,7 +34,6 @@ from rlinf.workers.rollout.sglang import Engine, io_struct
 from rlinf.workers.rollout.utils import (
     print_sglang_outputs,
 )
-from toolkits.math_verifier.verify import MathRewardModel, math_verify_call
 
 
 class SGLangWorker(Worker):
@@ -233,7 +231,6 @@ class AsyncSGLangWorker(SGLangWorker):
         self._rollout_end_event = asyncio.Event()
         self._sync_weight_end_event = asyncio.Event()
 
-        self._reward_model = MathRewardModel(scale=self._cfg.reward.reward_scale)
         assert self._rollout_batch_size is None, (
             "rollout_batch_size_per_gpu is not supported in AsyncSGLangWorker"
         )
@@ -261,29 +258,6 @@ class AsyncSGLangWorker(SGLangWorker):
         self._init_engine()
         if self._cfg.rollout.validate_weight:
             await self._validate_weight_at_first()
-
-    async def _compute_reward_and_advantage(
-        self, engine_results: List[Dict], answer: str
-    ):
-        answers = [answer] * len(engine_results)
-        texts: List[str] = []
-        for res in engine_results:
-            if hasattr(res, "text"):
-                texts.append(res["text"])
-            else:
-                texts.append(
-                    self._tokenizer.decode(res["output_ids"], skip_special_tokens=True)
-                )
-
-        results = math_verify_call(texts, answers)
-        rewards = [r * self._reward_model.scale for r in results]
-        rewards_tensor = torch.tensor(rewards, dtype=torch.float)
-
-        mean = rewards_tensor.mean()
-        std = rewards_tensor.std()
-        advantages = (rewards_tensor - mean) / (std + 1e-6)
-
-        return rewards, advantages.tolist()
 
     async def _async_generate(
         self, raw_id: int, input_ids: List[int], sampling_params: dict

@@ -35,7 +35,6 @@ from rlinf.data.io_struct import RolloutRequest, RolloutResult
 from rlinf.scheduler import Channel, Worker
 from rlinf.utils.placement import ComponentPlacement
 from rlinf.workers.rollout.utils import print_vllm_outputs
-from toolkits.math_verifier.verify import MathRewardModel
 
 from . import VLLMExecutor
 
@@ -68,7 +67,6 @@ class VLLMWorker(Worker):
             "The capital of France is",
             "The future of AI is",
         ]
-        self._reward_model = MathRewardModel(self._cfg.reward.reward_scale)
         self.request_counter = Counter()
 
     def _prepare_vllm_environment(self) -> None:

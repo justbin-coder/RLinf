@@ -12,23 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from rlinf.algorithms.rewards.code import CodeReward
-from rlinf.algorithms.rewards.math import MathReward
-from rlinf.algorithms.rewards.vqa import VQAReward
+from typing import List
+
+from omegaconf import DictConfig
+
+from toolkits.code_verifier.verify import fim_verify_call
 
 
-def register_reward(name: str, reward_class: type):
-    assert name not in reward_registry, f"Reward {name} already registered"
-    reward_registry[name] = reward_class
+class CodeReward:
+    def __init__(self, config: DictConfig):
+        self.scale = config.get("reward_scale", 1.0)
 
-
-def get_reward_class(name: str):
-    assert name in reward_registry, f"Reward {name} not found"
-    return reward_registry[name]
-
-
-reward_registry = {}
-
-register_reward("math", MathReward)
-register_reward("vqa", VQAReward)
-register_reward("code", CodeReward)
+    def get_reward(
+        self, response: List[str], reference: List[List[str]]
+    ) -> List[float]:
+        rewards = fim_verify_call(response, reference)
+        return [float(reward) * self.scale for reward in rewards]
