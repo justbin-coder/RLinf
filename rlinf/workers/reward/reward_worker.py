@@ -60,13 +60,11 @@ class RewardWorker(Worker):
             input_channel: The input channel to read from.
             output_channel: The output channel to send results to.
         """
-
-        with self.worker_timer():
-            recv_batch_size = 0
-            while recv_batch_size < self.total_batch_size_per_dp:
-                rollout_result: RolloutResult = input_channel.get()
-                recv_batch_size += rollout_result.num_sequence
-
+        recv_batch_size = 0
+        while recv_batch_size < self.total_batch_size_per_dp:
+            rollout_result: RolloutResult = input_channel.get()
+            recv_batch_size += rollout_result.num_sequence
+            with self.worker_timer():
                 if rollout_result.rewards is None:
                     if self.cfg.reward.use_reward_model:
                         with input_channel.device_lock:
@@ -83,11 +81,11 @@ class RewardWorker(Worker):
                             rollout_result
                         )
 
-                output_channel.put(rollout_result)
+            output_channel.put(rollout_result)
 
-            assert recv_batch_size == self.total_batch_size_per_dp, (
-                f"Expected {self.total_batch_size_per_dp} sequences from channel, but got {recv_batch_size}"
-            )
+        assert recv_batch_size == self.total_batch_size_per_dp, (
+            f"Expected {self.total_batch_size_per_dp} sequences from channel, but got {recv_batch_size}"
+        )
 
     def _compute_rule_based_rewards(self, rollout_result: RolloutResult):
         # Decode only the generated tokens; response_ids are already the post-prompt tokens
