@@ -75,14 +75,6 @@ class VLLMWorker(_VllmInnerWorker):
         super().initialize_from_config(kv_cache_config)
 
     def offload_model_weights(self) -> None:
-        torch.cuda.synchronize()
-
-        model = self.model_runner.model
-        self._sleep_saved_buffers = {
-            name: buffer.cpu().clone() for name, buffer in model.named_buffers()
-        }
-        torch.cuda.empty_cache()
-
         super().sleep(level=2)
 
     def sync_hf_weight(self) -> None:
