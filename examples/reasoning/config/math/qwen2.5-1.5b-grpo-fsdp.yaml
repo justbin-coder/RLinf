@@ -83,7 +83,7 @@ rollout:
 
   gpu_memory_utilization: 0.55
 
-  model_dir: /path/to/model/DeepSeek-R1-Distill-Qwen-1.5B/
+  model_dir: /home/weight/DeepSeek-R1-Distill-Qwen-1.5B-2layer/
   model_arch: qwen2.5
   enforce_eager: False         # if False, rollout engine will capture cuda graph, which will take more time to initialize.
   distributed_executor_backend: mp   # ray or mp
@@ -92,10 +92,10 @@ rollout:
   padding: null               # will be tokenizer.pad_token_id if null. it is used to filter megatron's padding for rollout engine
   eos: null                   # will be tokenizer.eos_token_id if null.
     
-  rollout_backend: vllm     # here choose which backend to rollout,support [sglang, vllm] 
+  rollout_backend: sglang     # here choose which backend to rollout,support [sglang, vllm] 
 
   sglang:
-    attention_backend: triton # [flashinfer, triton] for more, see sglang's doc
+    attention_backend: ascend # [flashinfer, triton] for more, see sglang's doc
     decode_log_interval: 500000 # the interval for SGLang to log the decode time and other stats.
     use_torch_compile: False # enable torch_compile in SGLang for rollout.
     torch_compile_max_bs: 128 # the maximum batch size for torch compile. If the batch size is larger than this, torch compile will not be used.
@@ -108,7 +108,7 @@ rollout:
 
   return_logprobs: ${not:${algorithm.recompute_logprobs}}
 
-  tensor_parallel_size: 2
+  tensor_parallel_size: 1
   pipeline_parallel_size: 1
   
   validate_weight: False # whether to send all weights at first for weight comparison.
@@ -123,14 +123,14 @@ data:
   dataset_name: boba
   max_prompt_length: 1024
   filter_prompt_by_length: True
-  rollout_batch_size: 512
+  rollout_batch_size: 16
   val_rollout_batch_size: null
   num_workers: 2
   shuffle: True
   validation_shuffle: True
   seed: 1234
-  train_data_paths: ["/dataset/boba/AReaL-boba-106k.jsonl"]
-  val_data_paths: ["/dataset/boba/AReaL-boba-106k.jsonl"]
+  train_data_paths: ["/home/dataset/boba/AReaL-boba-106k.jsonl"]
+  val_data_paths: ["/home/dataset/boba/AReaL-boba-106k.jsonl"]
   prompt_key: prompt
   image_keys: [image]
   answer_key: answer
@@ -164,7 +164,7 @@ actor:
 
     seq_length: ${runner.seq_length}
     encoder_seq_length: ${runner.seq_length}
-    model_path: /path/to/model/DeepSeek-R1-Distill-Qwen-1.5B/
+    model_path: /home/weight/DeepSeek-R1-Distill-Qwen-1.5B-2layer/
 
   optim:
     optimizer: adam
@@ -194,7 +194,7 @@ actor:
     lr_decay_iters: 10
 
   tokenizer:
-    tokenizer_model: /path/to/model/DeepSeek-R1-Distill-Qwen-1.5B/
+    tokenizer_model: /home/weight/DeepSeek-R1-Distill-Qwen-1.5B-2layer/
     use_fast: False
     trust_remote_code: True
     padding_side: 'right'

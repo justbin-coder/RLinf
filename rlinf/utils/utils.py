@@ -21,13 +21,13 @@ from functools import partial, wraps
 
 import torch
 import torch.nn.functional as F
-
+import torch_npu
 
 def clear_memory(sync=True):
     if sync:
-        torch.cuda.synchronize()
+        torch.npu.synchronize()
     gc.collect()
-    torch.cuda.empty_cache()
+    torch.npu.empty_cache()
 
 
 def apply_func_to_dict(func, dictionary):
@@ -54,7 +54,7 @@ def retrieve_model_state_dict_in_cpu(model):
 
         cpu_dict[name] = item
 
-    torch.cuda.synchronize()
+    torch.npu.synchronize()
     return cpu_dict
 
 
@@ -126,13 +126,21 @@ def seq_mean_token_mean(values, mask):
 
 
 def logprobs_from_logits_flash_attn(logits, labels, inplace_backward=True):
-    from flash_attn.ops.triton.cross_entropy import cross_entropy_loss
+    #from flash_attn.ops.triton.cross_entropy import cross_entropy_loss
 
-    output = cross_entropy_loss(logits, labels, inplace_backward=inplace_backward)
-    assert isinstance(output, tuple), (
-        "please make sure flash-attn>=2.4.3 where cross_entropy_loss returns Tuple[losses, z_losses]."
-    )
-    return -output[0]
+    #output = cross_entropy_loss(logits, labels, inplace_backward=inplace_backward)
+    #assert isinstance(output, tuple), (
+    #    "please make sure flash-attn>=2.4.3 where cross_entropy_loss returns Tuple[losses, z_losses]."
+    #)
+    #return -output[0]
+    import torch.nn.functional as F
+
+    # 数值稳定的 log_softmax
+    log_probs = F.log_softmax(logits, dim=-1)
+
+    # 提取标签对应的 logprob
+    labels = labels.unsqueeze(-1)
+    return torch.gather(log_probs, -1, labels).squeeze(-1)
 
 
 def compute_logprobs_from_logits(logits, target, task_type="embodied"):

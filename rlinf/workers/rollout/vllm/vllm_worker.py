@@ -337,7 +337,8 @@ class VLLMWorker(Worker):
             trust_remote_code=self._cfg.actor.tokenizer.trust_remote_code,
             max_model_len=self._cfg.runner.seq_length,
             max_num_seqs=self._cfg.rollout.max_running_requests,
-            enable_sleep_mode=True,  # it enables offload weights
+            enable_sleep_mode=False,
+            device="npu", 
         )
         vllm_config: VllmConfig = engine_args.create_engine_config()
 

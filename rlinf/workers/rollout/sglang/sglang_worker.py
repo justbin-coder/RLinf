@@ -113,6 +113,7 @@ class SGLangWorker(Worker):
             log_level="info",
             max_running_requests=self._cfg.rollout.max_running_requests,
             dist_init_addr=f"127.0.0.1:{str(Cluster.find_free_port())}",
+            device="npu",
         )
 
         self.log_on_first_rank(f"{server_args=}")

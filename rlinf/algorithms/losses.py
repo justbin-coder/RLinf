@@ -201,11 +201,15 @@ def compute_math_ppo_actor_loss(**kwargs):
     advantages = kwargs["advantages"]
     loss_mask = kwargs.get("loss_mask", None)
     c_clip = kwargs.get("c_clip", None)
-
-    assert logprobs.dtype == torch.float32
-    assert old_logprobs.dtype == torch.float32
-    assert advantages.dtype == torch.float32
-
+    if logprobs.dtype != torch.float32:
+        logprobs = logprobs.float()  # 转换为 float32
+    #assert logprobs.dtype == torch.float32
+    #assert old_logprobs.dtype == torch.float32
+    #assert advantages.dtype == torch.float32
+    if old_logprobs.dtype != torch.float32:
+        old_logprobs = old_logprobs.float()
+    if advantages.dtype != torch.float32:
+        advantages = advantages.float()
     assert loss_mask is not None
 
     loss_mask_count = loss_mask.count_nonzero() or 1
