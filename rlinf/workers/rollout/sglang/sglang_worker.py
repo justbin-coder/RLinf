@@ -113,6 +113,8 @@ class SGLangWorker(Worker):
             log_level="info",
             max_running_requests=self._cfg.rollout.max_running_requests,
             dist_init_addr=f"127.0.0.1:{str(Cluster.find_free_port())}",
+            device="npu",
+            watchdog_timeout=3600,
         )
 
         self.log_on_first_rank(f"{server_args=}")
@@ -176,6 +178,7 @@ class SGLangWorker(Worker):
         for request in requests:
             # Generate outputs using the SGLang engine.
             with self.worker_timer():
+                self.log_info(f"Generating {len(request.input_ids)} samples...")
                 results = self._engine.generate(
                     input_ids=request.input_ids,
                     # 0.4.4 has modality bug,can't pass non-None image_data
@@ -183,6 +186,8 @@ class SGLangWorker(Worker):
                     sampling_params=self._sampling_params,
                     return_logprob=self._return_logprobs,
                 )
+
+            self.log_info(f"Generation for {len(request.input_ids)} samples done.")
 
             # Create RolloutResult from the outputs.
             rollout_result = RolloutResult.from_sglang_results(

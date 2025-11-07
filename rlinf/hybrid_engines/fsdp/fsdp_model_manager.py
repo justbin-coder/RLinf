@@ -35,6 +35,7 @@ from rlinf.hybrid_engines.fsdp.utils import (
 from rlinf.utils.logging import get_logger
 from rlinf.utils.utils import clear_memory
 
+import torch_npu
 
 class FSDPModelManager:
     """
@@ -55,9 +56,9 @@ class FSDPModelManager:
 
         use_triton = cfg.get("use_triton", True)
 
-        assert torch.cuda.is_available(), "CUDA is not available."
+        assert torch.npu.is_available(), "CUDA is not available."
         local_rank = int(os.environ.get("LOCAL_RANK", 0))
-        device = torch.device(f"cuda:{local_rank}")
+        device = torch.npu.device(f"npu:{local_rank}")
 
         model_config = AutoConfig.from_pretrained(
             cfg.model.model_path,

@@ -27,7 +27,7 @@ from rlinf.utils.data_iter_utils import (
     get_iterator_k_split,
     split_list,
 )
-
+import torch_npu
 
 def get_batch_size(
     batch: Dict[str, torch.Tensor], batch_tensor_key: str = "input_ids"
@@ -809,12 +809,12 @@ class RolloutResult:
         )  # [B, training_seq_length]
 
         batch = {
-            "input_ids": input_ids.cuda(),
-            "attention_mask": attention_mask.cuda(),
-            "is_end": is_end.cuda(),
-            "position_ids": position_ids.cuda(),
-            "prompt_lengths": prompt_lengths.cuda(),
-            "response_lengths": response_lengths.cuda(),
+            "input_ids": input_ids.npu(),
+            "attention_mask": attention_mask.npu(),
+            "is_end": is_end.npu(),
+            "position_ids": position_ids.npu(),
+            "prompt_lengths": prompt_lengths.npu(),
+            "response_lengths": response_lengths.npu(),
         }
 
         if (
@@ -825,7 +825,7 @@ class RolloutResult:
 
         if self.advantages is not None:
             if isinstance(self.advantages, torch.Tensor):
-                batch["advantages"] = self.advantages.cuda()
+                batch["advantages"] = self.advantages.npu()
             else:
                 response_attention_mask = attention_mask[
                     :, -max_response_len:
@@ -833,17 +833,17 @@ class RolloutResult:
                 advantages = torch.tensor(self.advantages, dtype=torch.float32).reshape(
                     -1, 1
                 )  # [B, 1]
-                advantages = response_attention_mask.float().cuda() * advantages.cuda()
-                batch["advantages"] = advantages.cuda()
+                advantages = response_attention_mask.float().npu() * advantages.npu()
+                batch["advantages"] = advantages.npu()
 
         if self.prev_logprobs is not None:
-            batch["prev_logprobs"] = self.prev_logprobs.cuda()
+            batch["prev_logprobs"] = self.prev_logprobs.npu()
 
         if self.ref_logprobs is not None:
-            batch["ref_logprobs"] = self.ref_logprobs.cuda()
+            batch["ref_logprobs"] = self.ref_logprobs.npu()
 
         if self.rewards is not None:
-            batch["rewards"] = self.rewards.cuda()
+            batch["rewards"] = self.rewards.npu()
 
         if self.rollout_logprobs is not None:
             logprobs = batch_pad_to_fixed_len(
@@ -854,7 +854,7 @@ class RolloutResult:
                 max_batch_len=max_response_len,
                 pad_token=pad_token,
             )
-            batch["prev_logprobs"] = logprobs.cuda()
+            batch["prev_logprobs"] = logprobs.npu()
 
         return batch
 

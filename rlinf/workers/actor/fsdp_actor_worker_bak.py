@@ -257,32 +257,20 @@ class FSDPActor(FSDPModelManager, Worker):
             batch, rollout_result = self.get_batch(input_channel)
             recv_batch_size += rollout_result.num_sequence
             self._load_weight_and_optimizer(
-                    input_channel if self.is_pipeline else rollout_channel
+                input_channel if self.is_pipeline else rollout_channel
             )
-            num_splits = (
-                rollout_result.num_sequence
-                // self.cfg.algorithm.logprob_forward_micro_batch_size
-            )
-            micro_batches_iter = get_iterator_k_split(
-                batch,
-                num_splits=num_splits,
-            )
-            micro_batches = list(micro_batches_iter)
 
-            prev_logprobs = []
             with self.worker_timer():
-                for micro_batch in micro_batches:
-                    prev_logprobs.append(self.inference_step(micro_batch).cpu())
-                rollout_result.prev_logprobs = torch.cat(prev_logprobs)
+                prev_logprobs = self.inference_step(batch)
+                rollout_result.prev_logprobs = prev_logprobs.cpu()
+
             if compute_ref_logprobs:
                 assert self.ref_policy_state_dict is not None, (
                     "Reference policy state dict is None but compute_ref_logprobs is True"
                 )
-                ref_logprobs = []
                 with cpu_weight_swap(self.model, self.ref_policy_state_dict):
-                    for micro_batch in micro_batches:
-                        ref_logprobs.append(self.inference_step(micro_batch).cpu())
-                    rollout_result.ref_logprobs = torch.cat(ref_logprobs)
+                    ref_logprobs = self.inference_step(batch)
+                    rollout_result.ref_logprobs = ref_logprobs.cpu()
             self.put_result(rollout_result, output_channel)
 
         assert recv_batch_size == self.total_batch_size_per_dp, (

@@ -16,3 +16,4 @@ logs/*
 .venv
 uv.lock
 assets/
+kernel_meta/

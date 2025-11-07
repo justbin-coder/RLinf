@@ -86,7 +86,7 @@ rollout:
 
   model_dir: /home/x00922209/models/Qwen/Qwen2.5-VL-3B-Instruct
   model_arch: qwen2.5_vl #qwen2.5
-  enforce_eager: False         # if False, rollout engine will capture cuda graph, which will take more time to initialize.
+  enforce_eager: False         # if False, rollout engine will capture cuda graph, which will take more time to initialize. taoxu 1010
   distributed_executor_backend: mp   # ray or mp
   disable_log_stats: False
   detokenize: False            # Whether to detokenize the output. During RL we actually don't need to detokenize it. Can be set to True for debugging.
@@ -109,7 +109,7 @@ rollout:
 
   return_logprobs: ${not:${algorithm.recompute_logprobs}}
 
-  tensor_parallel_size: 1
+  tensor_parallel_size: 2
   pipeline_parallel_size: 1
   
   validate_weight: False # whether to send all weights at first for weight comparison.
@@ -201,12 +201,6 @@ actor:
     use_fast: False
     trust_remote_code: True
     padding_side: 'right'
-
-  fsdp:
-    forward_prefetch: True
-    limit_all_gathers: True
-    backward_prefetch: True
-    use_orig_params: True
 
 reward:
   group_name: "RewardGroup"
